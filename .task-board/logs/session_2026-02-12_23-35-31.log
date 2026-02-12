@@ -1,0 +1,16 @@
+=====================================
+=== SESSION START: 2026-02-12_23-35-31 ===
+Time: 2026-02-12T23:35:31+03:00
+Working dir: /Users/aagrigore1/src/skill-product-appraisal
+=====================================
+
+[23:35:31.879] [INFO] task-board-tui version dev
+[23:35:31.879] [INFO] Config loaded, refresh interval: 10s
+[23:49:14.802] [INFO] [ACTION] command_palette: opened
+[23:49:15.329] [DEBUG] [KEY] ф
+[23:49:16.107] [DEBUG] [KEY] backspace
+[23:49:16.509] [DEBUG] [KEY] down
+[23:49:16.735] [DEBUG] [KEY] enter
+[23:49:16.736] [INFO] command.ExecuteMsg received: cmd="agents" args=""
+[23:49:16.736] [INFO] executeCommand: cmd="agents" args=""
+[23:49:16.736] [INFO] [CMD] /agents → opening agents screen
