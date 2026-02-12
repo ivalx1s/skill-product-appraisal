@@ -14,3 +14,9 @@ Working dir: /Users/aagrigore1/src/skill-product-appraisal
 [23:49:16.736] [INFO] command.ExecuteMsg received: cmd="agents" args=""
 [23:49:16.736] [INFO] executeCommand: cmd="agents" args=""
 [23:49:16.736] [INFO] [CMD] /agents → opening agents screen
+[00:20:03.478] [INFO] Saving config and closing session
+
+=== SESSION END ===
+Duration: 44m32s
+Total actions: 11
+=====================================

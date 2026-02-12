@@ -1,14 +1,14 @@
 ## Status
-backlog
+closed
 
 ## Assigned To
-(none)
+agent-test-appraisal
 
 ## Created
 2026-02-12T21:04:24Z
 
 ## Last Update
-2026-02-12T21:04:32Z
+2026-02-12T22:59:18Z
 
 ## Blocked By
 - (none)
@@ -20,3 +20,4 @@ backlog
 (empty)
 
 ## Notes
+Evaluation moved to separate project: ~/src/bosch-glm100-appraisal/

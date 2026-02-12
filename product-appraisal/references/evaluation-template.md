@@ -12,9 +12,15 @@
 
 1. Work through dimensions 1-7 sequentially. Each dimension has a **gate** -- if a gate fails, stop and address the issue before continuing.
 2. For every data point, fill in the **Source** column. Acceptable source types: `[Verified]` (URL/citation), `[Internal Data]`, `[Practitioner Guidance]`, `[Estimate]`, `[Calibrated]`.
-3. Score each criterion 1-5 (1 = fails badly, 3 = meets threshold, 5 = exceeds significantly).
-4. After all dimensions, fill the condensed scorecard at the end.
-5. Thresholds marked `*Calibrate*` must be set for your specific industry before evaluation begins.
+3. Use `appraise` CLI for all calculations:
+   - `appraise calc pricing bvr --input data.json` for BVR
+   - `appraise calc pricing tier_gap --input data.json` for tier gap analysis
+   - `appraise calc bundle classify --input data.json` for L/F/K classification
+   - `appraise calc financial stress_test --input data.json` for stress tests
+   - `appraise calc scoring go_no_go --input scoring.json` for final weighted score
+4. Score each criterion 1-5 (1 = fails badly, 3 = meets threshold, 5 = exceeds significantly).
+5. After all dimensions, fill the condensed scorecard at the end.
+6. Thresholds marked `*Calibrate*` must be set for your specific industry before evaluation begins.
 
 ---
 

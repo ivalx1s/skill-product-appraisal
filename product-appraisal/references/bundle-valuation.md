@@ -2,6 +2,8 @@
 
 Methods, frameworks, and benchmarks for evaluating bundled products and multi-component offerings. Universal -- applies to any industry with complex product bundles.
 
+**CLI:** Bundle calculations available via `appraise calc bundle <function>`. Key functions: `classify` (L/F/K), `dead_weight`, `cross_subsidy`, `component_activation`, `multi_component_usage`.
+
 ---
 
 ## Table of Contents

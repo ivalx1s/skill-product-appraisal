@@ -38,56 +38,158 @@ Tag every external claim with one of:
 
 This rule applies to BOTH the product being evaluated AND all competitor data.
 
+### Web Search Log
+
+During research phases, maintain a running search log:
+`{slug}-search-log.md` in `.research/`. Every web search and fetch gets
+logged immediately — URL visited, what was found, what was useful.
+
+```markdown
+## Search Log: {product}
+| # | Agent | Query / URL | Found | Useful? | Used In |
+|---|-------|-------------|-------|---------|---------|
+| 1 | P0a | "bosch glm 100 specs" | Official specs page | Yes | p0a-product |
+| 2 | P0b-leica | ozon.ru/product/... | Price 31,700 RUB | Yes | competitor-leica |
+| 3 | P0c | "laser rangefinder market size 2025" | $3.2B global | Yes | p0c-market |
+```
+
+**Why:** Prevents re-searching the same thing in later phases. Agents in
+phases 1-7 check the search log before doing new web searches. The log
+also serves as a source index for the final report.
+
 ---
 
 ## Evaluation Workflow
 
-Seven dimensions, evaluated sequentially. Each dimension has gate conditions
-that can trigger early exit (No-Go) or forced redesign before proceeding.
+**Nine phases, MapReduce pattern.** Each phase produces a separate document.
+This prevents context overflow — each agent reads only the phase outputs it
+needs, not the entire evaluation history. Independent phases run in parallel
+(Map); synthesis steps merge results (Reduce). Gate failures stop the chain.
 
 ```
-1. PRODUCT-MARKET FIT  ─── Does anyone want this?
-   GATE: segment <5% of base OR WTP below price → No-Go
+Phase 0: RESEARCH (MapReduce)
+   0a: product ─┐
+   0b: N competitors (parallel) ├─→ 0d: REDUCE → {slug}-p0-research.md
+   0c: market ──┘
+   │
+   ├──────────────┐
+   v              v
+Phase 1: PMF    Phase 3: BUNDLE(M+R) (parallel, both read p0 only)
+   │              │                   always per-component Map + Reduce
+   v              │
+Phase 2: PRICING  │
+   │              │
+   ├──────────────┘
+   v
+Phase 4: COMPETITIVE(M+R) ────────── always per-competitor Map + Reduce
    │
    v
-2. PRICING ADEQUACY  ──── Is the price justified?
-   GATE: BVR <1.0 at any tier → Redesign pricing
-   GATE: tier gaps disproportionate → Restructure tiers
-   │
-   v
-3. BUNDLE COMPOSITION  ── Is each component earning its place?
-   GATE: no clear Leader → Redesign bundle
-   GATE: dead weight >40% → Remove Killers or add swappability
-   GATE: access constraints >30% → Adapt for markets
-   │
-   v
-4. COMPETITIVE POSITION ─ Can it survive in the market?
-   GATE: <2 defensible components AND <6mo to imitation → Rethink
-   │
-   v
-5. FINANCIAL VIABILITY ── Does the math work?
-   GATE: unit economics negative at all tiers → Reprice or cut costs
-   GATE: net revenue negative after cannibalization → Redesign migration
-   GATE: stress test fails (costs +20%, growth -30%) → Build buffers
-   │
-   v
-6. CUSTOMER EXPERIENCE ── Will it improve the relationship?
-   GATE: price >80% of WTP → Reprice
-   GATE: disappointment risk >15% drop → Improve quality
-   │
-   v
-7. MARKET REACH  ──────── Where can this actually launch?
-   GATE: access coverage <70% → Adapt components
-   GATE: no viable secondary markets → Consider niche strategy
-   │
-   v
-8. GO / NO-GO / REDESIGN DECISION
-   Weighted scoring across all 7 dimensions
+Phase 5: FINANCIAL ─┐
+   │                │
+Phase 6: CX  Phase 7: MARKET  ──── (P5+P6+P7 parallel in Wave 6)
+   │              │
+   └──────┬───────┘
+          v
+Phase 8: SCORING & DECISION ──────── REDUCE → {slug}-final-report.md
 ```
 
-**Critical rule:** Do NOT skip dimensions. A product can score 5/5 on financials
-but fail on bundle composition. The sequential flow catches structural problems
-before you waste time modeling revenue on a broken bundle.
+Gate failures at any phase stop the chain. See `references/evaluation-phases.md`
+for the full dependency graph and MapReduce orchestration details.
+
+**Critical rules:**
+- Do NOT skip phases. A product can score 5/5 on financials but fail on
+  bundle composition. Sequential flow catches structural problems early.
+- Each phase is a separate agent session. The agent reads the skill + its
+  phase's reference files + previous phase outputs. This keeps context lean.
+- Gate failures in phases 1-7 stop the chain. Document the failure and
+  recommend specific fixes before proceeding.
+
+### Phase Details
+
+See `references/evaluation-phases.md` for the full phase specification:
+per-phase inputs, outputs, what to read, what to write, and agent prompts.
+
+---
+
+## Project Tracking (task-board)
+
+**Dependency:** Requires the `project-management` skill with `task-board` CLI.
+
+Every evaluation is tracked on the task board. No untracked agents.
+The orchestrator builds tasks wave-by-wave, reviews results after each wave,
+then creates the next wave's tasks.
+
+### Board Structure
+
+```
+EPIC: "Evaluate {product} {YYMMDD}"   ← date for re-evaluation tracking
+├── STORY: "Wave 1: P0 Research (Map)"
+│   ├── TASK: "P0a: {product} specs"
+│   ├── TASK: "P0b: {competitor-1}"
+│   ├── TASK: "P0b: {competitor-2}"
+│   ├── ...
+│   └── TASK: "P0c: market context"
+├── STORY: "Wave 2: P0 Research (Reduce)"
+│   └── TASK: "P0d: synthesize research"
+├── STORY: "Wave 3: P1 PMF + P3 Bundle (Map)"
+│   ├── TASK: "P1: product-market fit"
+│   ├── TASK: "P3-map: {component-1}"
+│   ├── TASK: "P3-map: {component-2}"
+│   └── ...
+├── STORY: "Wave 4: P3 Reduce + P2 Pricing"
+│   ├── TASK: "P3-reduce: bundle synthesis"
+│   └── TASK: "P2: pricing adequacy"
+├── STORY: "Wave 5: P4 Competitive (Map)"
+│   ├── TASK: "P4-map: vs {competitor-1}"
+│   ├── TASK: "P4-map: vs {competitor-2}"
+│   └── ...
+├── STORY: "Wave 6: P4 Reduce + P5 + P6 + P7"
+│   ├── TASK: "P4-reduce: competitive synthesis"
+│   ├── TASK: "P5: financial viability"
+│   ├── TASK: "P6: customer experience"
+│   └── TASK: "P7: market reach"
+└── STORY: "Wave 7: P8 Scoring"
+    └── TASK: "P8: final report"
+```
+
+### Orchestrator Workflow
+
+The orchestrator does NOT create all waves upfront. It works wave-by-wave:
+
+1. **Create epic** for the evaluation
+2. **Plan Wave 1** — create story + tasks, set dependencies
+3. **Launch Wave 1 agents** — assign agents to tasks, set status `development`
+4. **Monitor** — check task statuses via `task-board agents`
+5. **Review Wave 1 results** — read output docs, verify quality, mark tasks `done`
+6. **Plan Wave 2** — based on Wave 1 results (e.g., now we know the components
+   for P3, the exact competitor list for P4)
+7. **Repeat** until Wave 8 completes
+
+**Why wave-by-wave:** Later waves depend on earlier results. You don't know
+which components to analyze in P3 until P0 research is done. You don't know
+competitor count for P4 until P0b results are in. Planning ahead would mean
+guessing.
+
+### Board Commands (quick reference)
+
+```bash
+task-board create epic --name "evaluate-{slug}-{YYMMDD}"
+task-board create story --epic EPIC-XX --name "wave-1-p0-research-map"
+task-board create task --story STORY-XX --name "p0a-product-specs" \
+  --description "Phase 0a: research {product} specs, prices, reviews"
+task-board assign TASK-XX --agent "p0a-agent"
+task-board progress status TASK-XX development
+task-board progress status TASK-XX done
+task-board q --format compact 'list(type=task, status=development) { overview }'
+```
+
+### Research Artifacts
+
+All research outputs go to `.research/` (persistent, not tied to board).
+Link from task notes:
+```bash
+task-board progress notes TASK-XX "Output: .research/{slug}-p0a-product.md"
+```
 
 ---
 
@@ -219,68 +321,30 @@ See `references/evaluation-template.md` for a ready-to-fill scoring template.
 
 ---
 
-## Theoretical Foundations (Summary)
+## Theoretical Foundations
 
-**Variance reduction** (Schmalensee, 1984): Bundling reduces valuation variance,
-enabling better surplus extraction through a single price point.
-
-**Mixed bundling optimality** (McAfee, McMillan & Whinston, 1989): Mixed bundling
-almost always strictly increases profits vs. pure bundling or pure component
-selling. Always offer the bundle AND standalone components simultaneously.
-
-**Dilution effect** (Shaddy & Fishbach, 2017): Consumers perceive bundles as
-gestalt units. Adding low-value components can reduce total WTP. Removing a
-component increases perceived loss; adding yields diminished perceived gain.
-
-**Good-Better-Best** (multiple sources; HBR Mohammed, 2018): Three-tier pricing
-exploits the compromise effect. ~66% choose the middle option. The top tier
-anchors; the bottom tier serves as a decoy.
-
-**Bundle framing** (Wansink et al., 1998): Presenting items as a bundle rather
-than individually boosts sales by ~32%, even at equivalent prices.
-
-See `references/pricing-methods.md` for detailed theory and application guidance.
+Key theories: variance reduction (Schmalensee), mixed bundling optimality
+(McAfee-McMillan-Whinston), dilution effect (Shaddy-Fishbach), Good-Better-Best
+pricing, bundle framing (Wansink). See `references/pricing-methods.md` for details.
 
 ---
 
 ## Output Format
 
-The evaluation deliverable follows this structure:
+Each phase produces a standalone document in `.research/`. The final
+deliverable is `{slug}-final-report.md` (Phase 8), which synthesizes
+all dimension scores into an executive summary.
 
-### 1. Executive Summary (1 page)
-- Product/bundle being evaluated
-- Target segment and market context
-- Overall score and Go/No-Go recommendation
-- Top 3 strengths and top 3 risks
+**Per-phase docs:** `{slug}-p{N}-{phase}.md` — see `references/evaluation-phases.md`
+for the structure of each phase document.
 
-### 2. Dimension Scores (1-2 pages)
-- Score per dimension (1-5) with 1-paragraph justification each
-- Gate pass/fail status for each dimension
-- Weighted total score
-
-### 3. Detailed Findings (per dimension)
-- Each criterion evaluated with evidence and source URLs
-- Red flags and gate failures highlighted
-- Comparison to benchmarks (tagged as Verified / Practitioner Guidance / Calibrate)
-
-### 4. Financial Model Summary
-- Unit economics table (revenue, costs, margin per customer per tier)
-- Cannibalization analysis
-- Stress test results (costs +20%, growth -30%)
-- Break-even timeline
-
-### 5. Competitive Landscape
-- Feature-by-feature comparison matrix (with source URLs for every data point)
-- BVR comparison across competitors
-- Defensibility assessment
-
-### 6. Risk Matrix
-- Each risk: probability (1-5) x impact (1-5) = score
-- Mitigation plan for top risks
-
-### 7. Recommendation
-- Go / Conditional Go / Redesign / No-Go with specific next steps
-- If Conditional Go or Redesign: list exactly which criteria must be addressed
+**Final report structure** (Phase 8 output):
+- Executive Summary: product, segment, overall score, Go/No-Go, top 3 strengths + risks
+- Scorecard: 7 dimensions + weighted total
+- Gate Pass/Fail Summary
+- Risk Matrix
+- Recommendation with specific next steps
+- Phase Document Index (links to p0-p7 docs)
 
 ---
 
@@ -326,6 +390,11 @@ Universal KPI reference across 6 categories: Revenue, Customer, Product
 Performance, Premium Segment, Bundle Economics, Market Context. Each KPI has
 a formula, target range, and calibration notes. 40+ metrics.
 
+### `references/evaluation-phases.md`
+Phase-by-phase evaluation workflow. Defines 9 phases (P0 research through P8
+scoring), per-phase inputs/outputs, document naming, agent orchestration
+pattern. **Read this first** when planning an evaluation.
+
 ### `references/evaluation-template.md`
 Ready-to-fill evaluation template. Includes: Strategic Fit Scorecard, Go/No-Go
 Decision Matrix, Risk Assessment Matrix, and per-dimension scoring sheets.
@@ -339,15 +408,87 @@ your own evaluations.
 
 ---
 
+## Calculation CLI: `appraise`
+
+All calculations (BVR, tier gaps, scoring, stress tests, etc.) are handled by
+the `appraise` CLI tool. Do not calculate manually — use the tool.
+
+**Install:** From the skill repo: `cd tools/appraise && make install`
+Installs globally to `~/.local/bin/appraise` — works from any project directory.
+
+### DSL Queries (primary agent interface)
+
+```bash
+# Discover all available calculations
+appraise q 'schema()'
+
+# Single calculation
+appraise q 'calc(pricing.bvr)' --input data.json
+
+# Batch multiple calculations in one call
+appraise q 'calc(pricing.bvr); calc(pricing.tier_gap); calc(bundle.dead_weight)' --input data.json
+
+# Compact output (fewer tokens)
+appraise q 'calc(scoring.go_no_go)' --input data.json --format compact
+```
+
+### Direct Calculation (simpler interface)
+
+```bash
+appraise calc pricing bvr --input data.json
+appraise calc scoring go_no_go --input scoring.json
+appraise calc financial stress_test --input financials.json
+```
+
+### Available Modules (38 functions)
+
+| Module | Functions | Key Calculations |
+|--------|-----------|------------------|
+| `pricing` | 6 | BVR, tier gap analysis, cost floor, price-value ratio, premium price index, bundle discount |
+| `bundle` | 5 | L/F/K classification, dead weight ratio, cross-subsidy analysis, component activation, multi-component usage |
+| `financial` | 9 | Unit economics, gross margin, CLV, CAC payback, break-even, cannibalization, stress test, incremental revenue, revenue uplift |
+| `customer` | 7 | Churn rate, retention, NPS, CSAT, churn reduction impact, revenue growth, service revenue share |
+| `product` | 8 | Penetration, migration, cannibalization rate, cross-sell, feature utilization, component activation, attach rate, trial conversion |
+| `scoring` | 3 | Go/No-Go (weighted 7-dimension), risk matrix, dimension score |
+
+### Input Data Format
+
+Prepare a JSON file with the `AppraisalInput` schema. Run `appraise q 'schema()'`
+to see the full schema. Minimal example for BVR:
+
+```json
+{
+  "product": {
+    "name": "Premium Bundle",
+    "price": 2000,
+    "components": [
+      {"name": "Service A", "standalone_price": 1500},
+      {"name": "Service B", "standalone_price": 800},
+      {"name": "Service C", "standalone_price": 500}
+    ]
+  }
+}
+```
+
+---
+
 ## Quick Start
 
-1. **Define scope:** What product/bundle? What market? What target segment?
-2. **Gather data:** Collect all product characteristics WITH source URLs.
-   Apply the source attribution rule -- no unsourced data.
-3. **Walk the 7 dimensions sequentially.** Do not skip. Stop at any gate failure.
-4. **Score each dimension** (1-5). Compute weighted total.
-5. **Write the deliverable** following the output format above.
-6. **Decide:** Go / Conditional Go / Redesign / No-Go.
+1. **Create epic:** `task-board create epic --name "evaluate-{slug}-{YYMMDD}"`
+   Date in name — product may be re-evaluated later when market changes.
+2. **Wave 1 — P0 Map:** Create story + tasks for P0a (product), P0b (each competitor),
+   P0c (market). Launch all agents in parallel. Every data point gets a URL.
+3. **Review Wave 1:** Read outputs, verify quality, mark tasks done.
+4. **Wave 2 — P0 Reduce:** Synthesize all research into `{slug}-p0-research.md`.
+5. **Wave 3 — P1+P3 Map:** PMF + per-component bundle analysis in parallel.
+6. **Wave 4 — P3 Reduce + P2:** Bundle synthesis + pricing (needs P1).
+7. **Wave 5 — P4 Map:** Per-competitor competitive analysis in parallel.
+8. **Wave 6 — P4 Reduce + P5 + P6 + P7:** Competitive synthesis + financial + CX + market (P6/P7 only need p0+p1, not P5).
+9. **Wave 7 — P8:** Collect scores, `appraise calc scoring go_no_go`, final report.
 
-For the full criteria checklist, start with `references/assessment-criteria.md`.
+Each wave: plan tasks on board → launch agents → review → plan next wave.
+Use `appraise` CLI for all calculations — never calculate manually.
+
+For the phased workflow details, see `references/evaluation-phases.md`.
+For the full criteria checklist, see `references/assessment-criteria.md`.
 For a worked example, see `references/example-telecom-appraisal.md`.

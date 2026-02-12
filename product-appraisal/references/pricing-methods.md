@@ -2,6 +2,8 @@
 
 Comprehensive reference for pricing strategy, willingness-to-pay research, and behavioral pricing mechanisms. All frameworks are universal (not industry-specific). External claims are tagged with verification status and source URLs.
 
+**CLI:** Pricing calculations available via `appraise calc pricing <function>`. Key functions: `bvr`, `tier_gap`, `cost_floor`, `price_value_ratio`, `premium_price_index`, `bundle_discount`.
+
 ---
 
 ## Table of Contents
@@ -318,6 +320,8 @@ Value Gap (perceived) = Perceived value of Tier N+1 - Perceived value of Tier N
 Value-to-Price Ratio = Value Gap / Price Gap
 ```
 
+> **CLI:** `appraise calc pricing tier_gap --input data.json` — computes all gaps with diagnosis (effective_upsell / broken_step / neutral)
+
 ### Diagnostic Framework
 
 | Pattern | Diagnosis | Effect |
@@ -366,6 +370,8 @@ Value-to-Price Ratio = Value Gap / Price Gap
 ```
 BVR = Sum of Standalone Prices / Bundle Price
 ```
+
+> **CLI:** `appraise calc pricing bvr --input data.json`
 
 **Interpretation:**
 
@@ -441,6 +447,8 @@ Cost Floor = Direct costs per customer
            + Customer service cost
            + Target minimum margin
 ```
+
+> **CLI:** `appraise calc pricing cost_floor --input data.json` — returns floor, margin, and clears_floor boolean
 
 **Rule:** Bundle price must exceed cost floor at every tier. If the entry tier falls below the cost floor, it is structurally unprofitable regardless of volume.
 

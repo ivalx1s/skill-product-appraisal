@@ -2,7 +2,9 @@
 
 Quick-reference catalog of KPIs for premium product and bundle assessment. Organized into 6 categories. Every benchmark is either fact-checked with a source URL or marked as practitioner guidance / calibrate-per-industry.
 
-**Usage:** Look up KPIs by category. Use formulas for calculation. Use benchmark ranges as starting points, then calibrate for your specific industry using the calibration notes at the bottom.
+**Usage:** Look up KPIs by category. Use `appraise` CLI for all calculations (see CLI commands below each table). Use benchmark ranges as starting points, then calibrate for your specific industry using the calibration notes at the bottom.
+
+**CLI:** All KPIs with formulas can be computed via `appraise calc <module> <function> --input data.json`. Run `appraise q 'schema()'` for the full API contract.
 
 ---
 
@@ -18,6 +20,8 @@ Quick-reference catalog of KPIs for premium product and bundle assessment. Organ
 | Ecosystem Revenue Share | Revenue from adjacent/ecosystem operations vs. total | `Ecosystem Revenue / Total Revenue` | Positive trend | Applicable to platform businesses and ecosystem plays. |
 | Revenue Growth Rate | Year-over-year growth in premium segment revenue | `(Revenue_t - Revenue_t-1) / Revenue_t-1` | Should outpace overall company average | Universal. |
 
+> **CLI:** `appraise calc financial revenue_uplift`, `appraise calc financial gross_margin`, `appraise calc financial unit_economics`, `appraise calc customer service_revenue_share`, `appraise calc customer revenue_growth`
+
 ---
 
 ## Category 2: Customer KPIs
@@ -32,6 +36,8 @@ Quick-reference catalog of KPIs for premium product and bundle assessment. Organ
 | CLV / LTV (Customer Lifetime Value) | Total value of a customer over their entire relationship | `RPC x Gross Margin % x Average Customer Lifespan` | Premium CLV: 2-4x base (practitioner target) | Widely used target for premium tiers in subscription businesses. Exact multiplier depends on margin structure and retention. |
 | CAC (Customer Acquisition Cost) | Cost to acquire one new customer | `Total Acquisition Spend / New Customers Acquired` | Calibrate per industry | SaaS: 12-18 month payback; consumer apps: 1-3 months. Acquiring new customers costs 5-25x more than retaining existing ones. [HBR](https://hbr.org/2014/10/the-value-of-keeping-the-right-customers) |
 | Churn Reduction Impact | Change in churn rate after premium/bundle launch | `(Churn_before - Churn_after) / Churn_before` | 5-50%+ depending on bundle design | Modest: 5-15% (general bundling, [Prince & Greenstein 2014](https://host.kelley.iu.edu/riharbau/RePEc/iuk/wpaper/bepp2011-05-prince-greenstein.pdf)); moderate: 25-35% (multi-product bundles); strong: 50%+ (tightly integrated bundles, [Ampere/Disney+](https://www.nexttv.com/news/disney-bundlers-59-less-likely-to-churn-research-company-says-chart)). |
+
+> **CLI:** `appraise calc customer churn_rate`, `appraise calc customer retention_rate`, `appraise calc customer nps`, `appraise calc customer csat`, `appraise calc customer churn_reduction`, `appraise calc financial clv`, `appraise calc financial cac_payback`
 
 ---
 
@@ -49,6 +55,8 @@ Quick-reference catalog of KPIs for premium product and bundle assessment. Organ
 | Attach Rate | Monthly usage of each bundle component | `Customers Using Component Monthly / Total Bundle Customers` | Track per component; declining attach signals dead weight | Universal for multi-component products. |
 | Trial-to-Paid Conversion | Share of trial/freemium users converting to paid | `Paid Conversions / Trial Users` | Self-serve: 3-5%; sales-assisted: 5-7%; top performers: 8-15% | [First Page Sage 2026](https://firstpagesage.com/seo-blog/saas-freemium-conversion-rates/) |
 
+> **CLI:** `appraise calc product penetration_rate`, `appraise calc product migration_rate`, `appraise calc product cannibalization_rate`, `appraise calc product feature_utilization`, `appraise calc product component_activation`, `appraise calc product attach_rate`, `appraise calc product trial_conversion`, `appraise calc financial break_even`
+
 ---
 
 ## Category 4: Premium Segment KPIs
@@ -65,6 +73,8 @@ Quick-reference catalog of KPIs for premium product and bundle assessment. Organ
 | Component Engagement Rate | Usage depth/frequency of bundled services | `Usage Events per Component per Customer per Period` | Track vs. standalone benchmarks | Universal for any bundle. Low engagement = potential dead weight. |
 | Dead Weight Ratio | Share of components with very low usage | `Components with <20% Monthly Usage / Total Components` | <40% (practitioner guidance, per Simon-Kucher data) | Some dead weight may be intentional (option value, premium signaling) but excessive dead weight erodes perceived value via dilution effect. [Shaddy & Fishbach 2017](https://www.anderson.ucla.edu/documents/areas/fac/marketing/Seminars/Fall%202017/Shaddy%20%20Fishbach%20-%20How%20Bundling%20Affects%20Valuation%20(job%20market%20paper).pdf) |
 
+> **CLI:** `appraise calc pricing bvr`, `appraise calc pricing price_value_ratio`, `appraise calc pricing premium_price_index`, `appraise calc bundle dead_weight`, `appraise calc bundle classify`
+
 ---
 
 ## Category 5: Bundle Economics KPIs
@@ -76,6 +86,8 @@ Quick-reference catalog of KPIs for premium product and bundle assessment. Organ
 | Partner/Licensing Cost Ratio | Third-party costs relative to premium revenue delta | `(Partner + Licensing Costs per Customer) / Premium Revenue Delta` | <30% (practitioner guidance) | Applicable when bundle includes third-party components. Industry-specific threshold. |
 | Incremental Revenue | Bundle revenue minus lost standalone revenue from migration | `Bundle Revenue per Customer - Lost Standalone Revenue per Customer` | Positive | Universal when bundle replaces existing products. Negative = cannibalization exceeds uplift. |
 | Multi-component Usage Rate | Share of customers using 3+ bundle components | `Customers Using 3+ Components / Total Bundle Customers` | >60% (practitioner target) | Universal for multi-component bundles. Low rate signals poor bundle composition or over-provisioning. |
+
+> **CLI:** `appraise calc pricing bvr`, `appraise calc bundle cross_subsidy`, `appraise calc financial cannibalization`, `appraise calc financial incremental_revenue`, `appraise calc bundle multi_component_usage`
 
 ---
 
