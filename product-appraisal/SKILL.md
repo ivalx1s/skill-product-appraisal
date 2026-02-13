@@ -346,6 +346,42 @@ for the structure of each phase document.
 - Recommendation with specific next steps
 - Phase Document Index (links to p0-p7 docs)
 
+### Final Deliverables Package
+
+After Phase 8, the orchestrator MUST produce **4 standalone deliverables** and
+copy them into a timestamped results folder:
+
+```
+results/{YYMMDD}_{HHmmss}_{slug}/
+  01-research-summary.md    ← {slug}-p0-research.md
+  02-scoring-breakdown.md   ← NEW: consolidated scoring rationale (see below)
+  03-recommendations.md     ← NEW: extracted recommendations + risk matrix
+  04-final-report.md        ← {slug}-final-report.md
+```
+
+**`02-scoring-breakdown.md`** (required, not in Phase 8 output):
+- Weighted scorecard table (dimension, phase, raw score, weight, weighted, source doc)
+- Per-dimension rationale (1 paragraph each: what scored well, deductions, gates)
+- Full gate summary table (all gates from P1-P7 with PASS/WARN/FAIL)
+- Calculation method (weights, how Customer Demand and Risk Profile are derived)
+- This doc answers "how was the score calculated?" without requiring the reader
+  to open 7 separate phase documents.
+
+**`03-recommendations.md`** (required, extracted from final report + phase analyses):
+- Decision (Go/Conditional Go/Redesign/No-Go) with score
+- Conditions for full approval (if Conditional Go) with problem/actions/impact/source
+- Strategic recommendations beyond conditions
+- Risk mitigation matrix (risk, probability, impact, score, mitigation, owner)
+- Score improvement roadmap (current vs projected scores if conditions met)
+
+Both documents are produced by the orchestrator after Phase 8 completes, using
+data already present in phase outputs. No new research or agent launches needed.
+
+**Why separate docs:** The final report is an executive summary — concise by design.
+Stakeholders who need "show your work" get the scoring breakdown. Stakeholders who
+need "what do we do?" get the recommendations. The research summary provides raw
+data for anyone who wants to verify claims.
+
 ---
 
 ## Calibration
